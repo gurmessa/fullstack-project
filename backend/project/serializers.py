@@ -61,3 +61,42 @@ class PickupFeedbackSerializer(serializers.ModelSerializer):
 		)
 		return feedback
 
+
+class FeedbackSerializer(serializers.ModelSerializer):
+	""" Serialize Feedback request. """
+
+	class Meta:
+		model = Feedback
+		fields = ('comment', )
+
+
+class FeedbackRequestDetailSerializer(serializers.ModelSerializer):
+	""" Serialize Feedback request. """
+	class FeedbackSerializer(serializers.ModelSerializer):
+		class Meta:
+			model = Feedback
+			fields = ('comment', )
+
+	class EssaySerializer(serializers.ModelSerializer):
+		revision_of = serializers.SerializerMethodField()
+		feedback = FeedbackSerializer()
+		
+		class Meta:
+			model = Essay
+			fields = (
+				'pk',
+				'name',
+				'feedback',
+				'revision_of',
+			)
+
+		def get_revision_of(self, obj):
+			if obj.revision_of:
+				return FeedbackRequestDetailSerializer.EssaySerializer(obj.revision_of).data
+			return None
+
+	essay = EssaySerializer()
+
+	class Meta:
+		model = FeedbackRequest
+		fields = ('pk', 'essay')
