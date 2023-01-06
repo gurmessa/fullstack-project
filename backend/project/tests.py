@@ -287,3 +287,4 @@ class FeedbackRequestRetrieveAPIViewTestCase(TestCase):
 		self.assertEqual(data['essay']['revision_of']['pk'], self.old_essay.pk)
 		self.assertEqual(data['essay']['revision_of']['revision_of']['pk'], self.older_essay.pk)
 
+		

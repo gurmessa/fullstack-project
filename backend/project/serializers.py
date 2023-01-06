@@ -67,15 +67,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Feedback
-		fields = ('comment', )
+		fields = ('pk', 'comment', )
 
 
 class FeedbackRequestDetailSerializer(serializers.ModelSerializer):
 	""" Serialize Feedback request. """
-	class FeedbackSerializer(serializers.ModelSerializer):
-		class Meta:
-			model = Feedback
-			fields = ('comment', )
 
 	class EssaySerializer(serializers.ModelSerializer):
 		revision_of = serializers.SerializerMethodField()
