@@ -19,7 +19,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from project.views import FeedbackRequestViewSet, HomeView, LoginView, \
-    LogoutView, PlatformView, ReturnFeedbackView
+    LogoutView, PlatformView, ReturnFeedbackView, PickupFeedbackRequestView
 
 router = SimpleRouter()
 router.register('api/feedback-request', FeedbackRequestViewSet, basename='feedback-request')
@@ -30,5 +30,6 @@ urlpatterns = router.urls + [
 	path('login/', LoginView.as_view(), name='user-login'),
 	path('logout/', LogoutView.as_view(), name='user-logout'),
 	path('platform/', PlatformView.as_view(), name='platform'),
-    path('feedback/<pk>/return', ReturnFeedbackView.as_view(), name='return-feedback'),
+    path('api/feedback/<pk>/return', ReturnFeedbackView.as_view(), name='return-feedback'),
+    path('api/feedback-request/pickup', PickupFeedbackRequestView.as_view(), name='pickup-feedback'),
 ]

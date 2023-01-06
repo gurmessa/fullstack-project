@@ -11,7 +11,7 @@ from rest_framework import generics
 from project.models import FeedbackRequest, Feedback
 
 from project.serializers import EssaySerializer, FeedbackRequestSerializer, \
-	ReturnFeedbackSerializer
+	ReturnFeedbackSerializer, PickupFeedbackSerializer
 from project.utilities import FeedbackRequestManager
 
 
@@ -28,6 +28,19 @@ class FeedbackRequestViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
 class ReturnFeedbackView(generics.UpdateAPIView):
 	""" View for returning feedback"""
 	serializer_class = ReturnFeedbackSerializer
+	permission_classes = (IsAuthenticated,)
+
+	def get_object(self):
+		return Feedback.objects.get(
+			pk=self.kwargs['pk'],
+			edited_by=self.request.user,
+			status=Feedback.PICKED_UP_FEEDBACK
+		)
+
+
+class PickupFeedbackRequestView(generics.CreateAPIView):
+	""" View for returning feedback"""
+	serializer_class = PickupFeedbackSerializer
 	permission_classes = (IsAuthenticated,)
 
 	def get_object(self):
