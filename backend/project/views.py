@@ -7,9 +7,11 @@ from rest_framework import status
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from project.models import FeedbackRequest
+from rest_framework import generics
+from project.models import FeedbackRequest, Feedback
 
-from project.serializers import EssaySerializer, FeedbackRequestSerializer
+from project.serializers import EssaySerializer, FeedbackRequestSerializer, \
+	ReturnFeedbackSerializer
 from project.utilities import FeedbackRequestManager
 
 
@@ -21,6 +23,19 @@ class FeedbackRequestViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
 
 	def get_queryset(self):
 		return FeedbackRequestManager.query_for_user(self.request.user, include_edited=False).select_related('essay')
+
+
+class ReturnFeedbackView(generics.UpdateAPIView):
+	""" View for returning feedback"""
+	serializer_class = ReturnFeedbackSerializer
+	permission_classes = (IsAuthenticated,)
+
+	def get_object(self):
+		return Feedback.objects.get(
+			pk=self.kwargs['pk'],
+			edited_by=self.request.user,
+			status=Feedback.PICKED_UP_FEEDBACK
+		)
 
 
 class HomeView(views.APIView):
