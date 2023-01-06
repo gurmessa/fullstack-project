@@ -33,5 +33,5 @@ urlpatterns = router.urls + [
 	path('platform/', PlatformView.as_view(), name='platform'),
     path('api/feedback-request/<pk>/return', ReturnFeedbackView.as_view(), name='return-feedback'),
     path('api/feedback-request/<pk>/detail', FeedbackRequestRetrieveAPIView.as_view(), name='feedback-request-detail'),
-    path('api/feedback/pickup', PickupFeedbackRequestView.as_view(), name='pickup-feedback'),    
+    path('api/feedback-request/pickup', PickupFeedbackRequestView.as_view(), name='pickup-feedback'),    
 ]
