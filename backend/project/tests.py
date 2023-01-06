@@ -252,3 +252,36 @@ class PickupFeedbackViewTestCase(TestCase):
 		self.assertEqual(self.user, feedback.edited_by)
 
 
+
+
+class FeedbackRequestRetrieveAPIViewTestCase(TestCase):
+	""" Test pickupfeedback  views. """
+	def setUp(self):
+		self.user = user_factory()
+		self.admin = user_factory(is_superuser=True)
+		self.older_essay= essay_factory()
+		self.old_essay = essay_factory(revision_of=self.older_essay)
+		self.essay = essay_factory(revision_of=self.old_essay)
+		print(self.essay.pk)
+	def test_pickup_feedback_request(self):	
+		feedback_request = feedback_request_factory(self.older_essay)
+		feedback_request.assigned_editors.add(self.user)
+		feedback = feedback_factory(self.older_essay, feedback_request, self.user)
+		
+		feedback_request = feedback_request_factory(self.old_essay)
+		feedback_request.assigned_editors.add(self.user)
+		feedback = feedback_factory(self.old_essay, feedback_request, self.user)
+		
+
+		feedback_request = feedback_request_factory(self.essay)
+		feedback_request.assigned_editors.add(self.user)
+		feedback = feedback_factory(self.essay, feedback_request, self.user, False)
+		
+		url = reverse('feedback-request-detail', kwargs={'pk':feedback_request.pk })
+
+		
+		self.client.force_login(self.user)
+		response = self.client.get(url)
+		data = json.loads(response.content)
+		print(data)
+		
