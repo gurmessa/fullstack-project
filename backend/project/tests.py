@@ -214,10 +214,10 @@ class ReturnFeedbackViewTestCase(TestCase):
 		feedback_request.assigned_editors.add(self.user)
 		feedback = feedback_factory(self.essay, feedback_request, self.user, False)
 
-		url = reverse('return-feedback', kwargs={'pk': feedback.pk})
+		url = reverse('return-feedback', kwargs={'pk': feedback_request.pk})
 
 		fake = Faker()
-		data = {'comment': fake.paragraph(nb_sentences=3),}
+		data = {'comment': fake.paragraph(nb_sentences=3)}
 		
 		self.client.force_login(self.user)
 		response = self.client.put(url, data=json.dumps(data), content_type=JSON)
@@ -288,3 +288,4 @@ class FeedbackRequestRetrieveAPIViewTestCase(TestCase):
 		self.assertEqual(data['essay']['revision_of']['revision_of']['pk'], self.older_essay.pk)
 
 		
+		print(data)
