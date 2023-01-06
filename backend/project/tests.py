@@ -50,16 +50,19 @@ def feedback_request_factory(essay: Essay, assign=False):
 	return feedback_request
 
 
-def feedback_factory(essay: Essay, feedback_request: FeedbackRequest, user: User):
+def feedback_factory(essay: Essay, feedback_request: FeedbackRequest, user: User, with_comment=True):
 	""" Create a feedback """
 	fake = Faker()
-	return Feedback.objects.create(
+	feedback = Feedback(
 		essay=essay,
-		comment=fake.paragraph(nb_sentences=3),
 		feedback_request=feedback_request,
 		edited_by=user,
 		started_at=timezone.now()
-	)
+	)	
+	if with_comment:
+		feedback.comment = fake.paragraph(nb_sentences=3),
+	feedback.save()
+	return feedback
 
 
 class AuthenticationTestCase(TestCase):
@@ -194,4 +197,36 @@ class FeedbackRequestViewTestCase(TestCase):
 		data = json.loads(response.content)
 		essay_feedback_request_ids = [d['pk'] for d in data]
 		self.assertNotIn(returned_feedback_request.pk, essay_feedback_request_ids)
+
+
+
+class ReturnFeedbackViewTestCase(TestCase):
+	""" Test feedback request views. """
+	def setUp(self):
+		self.user = user_factory()
+		self.admin = user_factory(is_superuser=True)
+		self.old_essay = essay_factory()
+		self.essay = essay_factory(revision_of=self.old_essay)
+
+	def test_feedback(self):	
+		# The user sees requests matched with them, not requests matched with others
+		feedback_request = feedback_request_factory(self.essay)
+		feedback_request.assigned_editors.add(self.user)
+		feedback = feedback_factory(self.essay, feedback_request, self.user, False)
+
+		url = reverse('return-feedback', kwargs={'pk': feedback.pk})
+
+		fake = Faker()
+		data = {'comment': fake.paragraph(nb_sentences=3),}
+		
+		self.client.force_login(self.user)
+		response = self.client.put(url, data=json.dumps(data), content_type=JSON)
+		self.assertEqual(response.status_code, 200)
+		feedback = Feedback.objects.get(pk=feedback.pk)
+		self.assertEqual(data['comment'], feedback.comment)
+		self.assertEqual(Feedback.RETURN_FEEDBACK, feedback.status)
+
+		# test can not send feedback to already returned feedback
+		response = self.client.put(url, data=json.dumps(data), content_type=JSON)
+		self.assertEqual(response.status_code, 200)
 
