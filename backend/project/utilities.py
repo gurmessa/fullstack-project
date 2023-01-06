@@ -1,5 +1,6 @@
 from django.db.models import query
-from project.models import FeedbackRequest, User
+from django.db.models import Q
+from project.models import FeedbackRequest, Feedback, User
 
 
 class FeedbackRequestManager:
@@ -13,5 +14,13 @@ class FeedbackRequestManager:
 		"""
 		queryset = FeedbackRequest.objects.filter(assigned_editors=user)
 		if not include_edited:
-			queryset = queryset.filter(edited=False)
+			queryset = queryset.filter(
+				Q(feedback_request__isnull=True) |
+				Q(
+					feedback_request__status=Feedback.PICKED_UP_FEEDBACK,
+					feedback_request__edited_by=user
+				)
+			).exclude(
+				feedback_request__status=Feedback.RETURN_FEEDBACK
+			)
 		return queryset
