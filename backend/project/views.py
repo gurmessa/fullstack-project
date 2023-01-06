@@ -44,7 +44,7 @@ class ReturnFeedbackView(generics.UpdateAPIView):
 
 	def get_object(self):
 		return Feedback.objects.get(
-			pk=self.kwargs['pk'],
+			feedback_request__pk=self.kwargs['pk'],
 			edited_by=self.request.user,
 			status=Feedback.PICKED_UP_FEEDBACK
 		)
@@ -55,12 +55,6 @@ class PickupFeedbackRequestView(generics.CreateAPIView):
 	serializer_class = PickupFeedbackSerializer
 	permission_classes = (IsAuthenticated,)
 
-	def get_object(self):
-		return Feedback.objects.get(
-			pk=self.kwargs['pk'],
-			edited_by=self.request.user,
-			status=Feedback.PICKED_UP_FEEDBACK
-		)
 
 
 class HomeView(views.APIView):
