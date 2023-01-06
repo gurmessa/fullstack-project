@@ -1,0 +1,9 @@
+/** This less module provides an example of how we could create a custom compilation of antd's styles
+	with our own less variables.
+	If you import this file in an app (or module), webpack is already configured to compile
+	it properly.
+*/
+
+@import '~antd/lib/style/themes/default.less';
+@import '~antd/dist/antd.less'; // Import Ant Design styles by less entry
+@import './theme.less'; // variables to override above

@@ -1,0 +1,51 @@
+// You can use these variables in any sass file that lives below /components or /apps
+
+// Colors
+$promptGreen: #2da7a1;
+$promptOrange: #f58025;
+$promptBlue: #20272d;
+$body-font: 'Helvetica', sans-serif;
+$vollkorn: vollkorn, serif;
+$body-bg-color: #f0f2f5;
+$alt-bg-color: #fff;
+$header-nav-color: #fff;
+$page-header-color: #fff;
+$border-color: #f0f0f0;
+$border-color-dark: #bfbfbf;
+
+// Fonts
+$semi-bold: 600;
+
+// Border width
+$b-sm: 1px;
+$b-md: 2px;
+$b-lg: 4px;
+
+// margin
+$m-xs: 4px;
+$m-sm: 8px;
+$m-md: 16px;
+$m-lg: 24px;
+$m-xl: 32px;
+
+// padding
+$p-xs: 4px;
+$p-sm: 8px;
+$p-md: 16px;
+$p-lg: 24px;
+$p-xl: 32px;
+
+// gutter
+$g-xs: 4px;
+$g-sm: 8px;
+$g-md: 16px;
+$g-lg: 24px;
+$g-xl: 32px;
+
+// media breakpoints
+$xs: 480px;
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1200px;
+$xxl: 1600px;

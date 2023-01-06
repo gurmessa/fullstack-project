@@ -1,0 +1,23 @@
+# Front-end
+**/node_modules/*
+**/.cache/*
+**/dist/*
+package-lock.json
+
+# Back-end
+*.pyc
+.python-version
+
+# Local static and media directories
+static/*
+media/*
+
+# Test
+coverage
+.coverage
+htmlcov/
+
+# Misc
+.vscode
+.DS_Store
+backend/db.sqlite3

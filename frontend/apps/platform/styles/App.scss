@@ -1,0 +1,19 @@
+$nav-logo-max-width: 160px;
+$nav-logo-max-height: 32px;
+.platformApp {
+  min-height: 100vh !important;
+  :global {
+    .logo {
+      float: left;
+    }
+    .logout {
+      float: right;
+    }
+    .logo-img {
+      max-width: $nav-logo-max-width;
+      max-height: $nav-logo-max-height;
+      width: auto;
+      height: auto;
+    }
+  }
+}
