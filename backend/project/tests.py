@@ -9,7 +9,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib import auth
 
-from project.models import Essay, FeedbackRequest, User
+from project.models import Essay, FeedbackRequest, User, Feedback
 
 USER_PASSWORD = '12345'
 JSON = 'application/json'
@@ -44,10 +44,22 @@ def essay_factory(revision_of: Optional[Essay] = None):
 
 def feedback_request_factory(essay: Essay, assign=False):
 	""" Create a feedback request. """
-	feedback_request = FeedbackRequest.objects.create(essay=essay, edited=False, deadline=timezone.now())
+	feedback_request = FeedbackRequest.objects.create(essay=essay, deadline=timezone.now())
 	if assign:
 		feedback_request.assigned_editors(*User.objects.all())
 	return feedback_request
+
+
+def feedback_factory(essay: Essay, feedback_request: FeedbackRequest, user: User):
+	""" Create a feedback """
+	fake = Faker()
+	return Feedback.objects.create(
+		essay=essay,
+		comment=fake.paragraph(nb_sentences=3),
+		feedback_request=feedback_request,
+		edited_by=user,
+		started_at=timezone.now()
+	)
 
 
 class AuthenticationTestCase(TestCase):
@@ -114,6 +126,7 @@ class FeedbackRequestViewTestCase(TestCase):
 
 	def setUp(self):
 		self.user = user_factory()
+		self.other_user = user_factory()
 		self.admin = user_factory(is_superuser=True)
 		self.old_essay = essay_factory()
 		self.essay = essay_factory(revision_of=self.old_essay)
@@ -141,10 +154,44 @@ class FeedbackRequestViewTestCase(TestCase):
 		self.assertEqual(data[0].get('pk'), fr_matched_with_editor.pk)
 		self.assertIsInstance(data[0].get('essay'), dict)
 
-		# The user does not see requests that are edited
-		fr_matched_with_editor.edited = True
-		fr_matched_with_editor.save()
+		# The user sees requests they have picked
+		essay2 = essay_factory()
+		picked_feedback_request = feedback_request_factory(essay2)
+		picked_feedback_request.assigned_editors.add(self.user)
+		feedback_factory(self.essay, picked_feedback_request, self.user)
+
 		response = self.client.get(url)
 		self.assertEqual(response.status_code, 200)
 		data = json.loads(response.content)
-		self.assertEqual(len(data), 0)
+		essay_feedback_request_ids = [d['pk'] for d in data]
+		self.assertIn(picked_feedback_request.pk, essay_feedback_request_ids)
+
+
+
+		# The user can not see requests that others picked
+		essay3 = essay_factory()
+		other_user_picked_feedback_request = feedback_request_factory(essay3)
+		other_user_picked_feedback_request.assigned_editors.add(self.user)
+		picked_up_feedback_with_other_user = feedback_factory(essay3, other_user_picked_feedback_request, self.other_user)
+
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+		data = json.loads(response.content)
+		essay_feedback_request_ids = [d['pk'] for d in data]
+		self.assertNotIn(other_user_picked_feedback_request.pk, essay_feedback_request_ids)
+
+
+		# The user does not see requests that a feed back has been returned
+		essay4 = essay_factory()
+		returned_feedback_request = feedback_request_factory(essay4)
+		returned_feedback_request.assigned_editors.add(self.user)
+		returned_feedback = feedback_factory(essay4, returned_feedback_request, self.user)
+		returned_feedback.status = Feedback.RETURN_FEEDBACK
+		returned_feedback.save()
+
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+		data = json.loads(response.content)
+		essay_feedback_request_ids = [d['pk'] for d in data]
+		self.assertNotIn(returned_feedback_request.pk, essay_feedback_request_ids)
+
