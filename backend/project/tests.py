@@ -226,7 +226,29 @@ class ReturnFeedbackViewTestCase(TestCase):
 		self.assertEqual(data['comment'], feedback.comment)
 		self.assertEqual(Feedback.RETURN_FEEDBACK, feedback.status)
 
-		# test can not send feedback to already returned feedback
-		response = self.client.put(url, data=json.dumps(data), content_type=JSON)
-		self.assertEqual(response.status_code, 200)
+
+class PickupFeedbackViewTestCase(TestCase):
+	""" Test pickupfeedback  views. """
+	def setUp(self):
+		self.user = user_factory()
+		self.admin = user_factory(is_superuser=True)
+		self.old_essay = essay_factory()
+		self.essay = essay_factory(revision_of=self.old_essay)
+
+	def test_pickup_feedback_request(self):	
+		# The user sees requests matched with them, not requests matched with others
+		feedback_request = feedback_request_factory(self.essay)
+		feedback_request.assigned_editors.add(self.user)
+
+		url = reverse('pickup-feedback')
+
+		data = {'feedback_request': feedback_request.pk}
+		
+		self.client.force_login(self.user)
+		response = self.client.post(url, data=json.dumps(data), content_type=JSON)
+		self.assertEqual(response.status_code, 201)
+		feedback = Feedback.objects.last()
+
+		self.assertEqual(self.user, feedback.edited_by)
+
 
