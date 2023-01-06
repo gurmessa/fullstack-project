@@ -82,6 +82,7 @@ class FeedbackRequestDetailSerializer(serializers.ModelSerializer):
 			fields = (
 				'pk',
 				'name',
+				'content',
 				'feedback',
 				'revision_of',
 			)
