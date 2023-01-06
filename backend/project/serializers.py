@@ -22,10 +22,20 @@ class FeedbackRequestSerializer(serializers.ModelSerializer):
 	""" Serialize a FeedbackRequest. """
 
 	essay = EssaySerializer()
+	picked = serializers.SerializerMethodField() 
 
 	class Meta:
 		model = FeedbackRequest
-		fields = ('pk', 'essay', 'deadline')
+		fields = ('pk', 'essay', 'deadline', 'picked', )
+	
+	def get_picked(self, obj):
+		if(hasattr(obj, 'feedback_request')):
+			if obj.feedback_request.status == Feedback.PICKED_UP_FEEDBACK:
+				return True
+			if obj.feedback_request.status == Feedback.RETURN_FEEDBACK:
+				return False
+		else:
+			return False
 
 
 class ReturnFeedbackSerializer(serializers.ModelSerializer):

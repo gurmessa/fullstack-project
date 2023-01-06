@@ -157,6 +157,10 @@ class FeedbackRequestViewTestCase(TestCase):
 		self.assertEqual(data[0].get('pk'), fr_matched_with_editor.pk)
 		self.assertIsInstance(data[0].get('essay'), dict)
 
+		picked = [d['picked']for d in data if d['pk']==fr_matched_with_editor.pk][0]
+		self.assertEqual(picked, False)
+		
+
 		# The user sees requests they have picked
 		essay2 = essay_factory()
 		picked_feedback_request = feedback_request_factory(essay2)
@@ -168,8 +172,10 @@ class FeedbackRequestViewTestCase(TestCase):
 		data = json.loads(response.content)
 		essay_feedback_request_ids = [d['pk'] for d in data]
 		self.assertIn(picked_feedback_request.pk, essay_feedback_request_ids)
-
-
+		
+		picked = [d['picked']for d in data if d['pk']==picked_feedback_request.pk][0]
+		self.assertEqual(picked, True)
+		
 
 		# The user can not see requests that others picked
 		essay3 = essay_factory()
@@ -197,6 +203,8 @@ class FeedbackRequestViewTestCase(TestCase):
 		data = json.loads(response.content)
 		essay_feedback_request_ids = [d['pk'] for d in data]
 		self.assertNotIn(returned_feedback_request.pk, essay_feedback_request_ids)
+
+
 
 
 
