@@ -49,7 +49,7 @@ class Essay(models.Model):
 
 
 class FeedbackRequest(models.Model):
-	""" A request for feedback on an essay. """
+	""" A request for feedback on an essay."""
 
 	essay = models.OneToOneField(
 		'project.Essay',
@@ -58,11 +58,45 @@ class FeedbackRequest(models.Model):
 		help_text='The essay being edited as part of the feedback request. For simplicity, we assume that a feedback' +
 		' request consists of only one essay.'
 	)
-	assigned_editors = models.ManyToManyField('project.User', related_name='assigned_feedback_requests')
-	edited = models.BooleanField(
-		default=False,
-		help_text='If True, the request has been edited. Otherwise,' +
-		' the request is pending being edited. You will want to consider whether this field is needed and' +
-		' how it should be updated in the context of your work.'
-	)
+	assigned_editors = models.ManyToManyField(
+		'project.User', 
+		related_name='assigned_feedback_requests')
 	deadline = models.DateTimeField()
+
+
+class Feedback(models.Model):
+	"""A feedback on an essay."""
+	PICKED_UP_FEEDBACK = 0
+	RETURN_FEEDBACK = 1
+
+	FEEDBACK_STATUS_CHOICES = [
+		(PICKED_UP_FEEDBACK, 'Picked up feedback'),
+		(RETURN_FEEDBACK, 'Returned feedback')]
+
+	essay = models.OneToOneField(
+		'project.Essay',
+		on_delete=models.CASCADE,
+		related_name='feedback',
+		help_text='The essay on which feedback is given'
+	)
+	feedback_request = models.OneToOneField(
+		'project.FeedbackRequest',
+		on_delete=models.CASCADE,
+		related_name='feedback_request',
+		help_text='The feedback request on which feedback is given'
+	)
+	comment = models.TextField(
+		null=True,
+		blank=True,
+		help_text='Comment on the essay')
+	edited_by = models.ForeignKey(
+		'project.User', 
+		on_delete=models.CASCADE,
+		related_name='essays_feedback',
+		help_text='The editor that provided feedback'
+		)
+	started_at = models.DateTimeField()
+	ended_at = models.DateTimeField(blank=True, null=True)
+	status = models.IntegerField(
+		choices=FEEDBACK_STATUS_CHOICES, 
+		default=PICKED_UP_FEEDBACK)
