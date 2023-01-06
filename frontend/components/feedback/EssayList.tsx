@@ -6,7 +6,7 @@ import { loadFeedbackRequests } from 'store/feedback/feedbackThunks'
 import { FeedbackRequest } from 'store/feedback/feedbackTypes'
 import { useReduxDispatch } from 'store/store'
 import { useHistory } from "react-router-dom";
-
+import { getCurrentFeedbackRequestId } from 'apps/utils/utils'
 
 export const EssayList = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -32,7 +32,16 @@ export const EssayList = () => {
     })()
   }, [dispatch])
 
+  useEffect(() => {
+    let current_feedback_request_id = getCurrentFeedbackRequestId();
+    if(current_feedback_request_id){
+      history.push(`/feedback/${current_feedback_request_id}`)
+    }
+    
+  })
   const renderContent = () => {
+    
+    
     if (isLoading) {
       return (
         <Card className="center">
