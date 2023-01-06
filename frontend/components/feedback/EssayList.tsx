@@ -5,15 +5,22 @@ import { getEssays, selectOrderedFeedbackRequests } from 'store/feedback/feedbac
 import { loadFeedbackRequests } from 'store/feedback/feedbackThunks'
 import { FeedbackRequest } from 'store/feedback/feedbackTypes'
 import { useReduxDispatch } from 'store/store'
+import { useHistory } from "react-router-dom";
+
 
 export const EssayList = () => {
   const [isLoading, setIsLoading] = useState(false)
   const dispatch = useReduxDispatch()
   const feedbackRequests = useSelector(selectOrderedFeedbackRequests)
   const essays = useSelector(getEssays)
+  const history = useHistory()
+
+  const handleClick = (id: string) => {
+    history.push(`/feedback/${id}`)
+  }
 
   useEffect(() => {
-    ; (async () => {
+    (async () => {
       setIsLoading(true)
       try {
         await dispatch(loadFeedbackRequests())
@@ -39,9 +46,13 @@ export const EssayList = () => {
         dataSource={feedbackRequests}
         renderItem={(item: FeedbackRequest) => {
           const essay = essays[item.essay]
+
           return (
-            <List.Item>
+            <List.Item
+              actions={[<a key="list-loadmore-edit" onClick={() => { handleClick(item.pk) }}>edit</a>]}
+            >
               <List.Item.Meta title={essay.name} />
+              
             </List.Item>
           )
         }} />
