@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from project.models import Essay, FeedbackRequest
+from project.models import Essay, FeedbackRequest, Feedback
 
 
 class EssaySerializer(serializers.ModelSerializer):
@@ -24,4 +24,18 @@ class FeedbackRequestSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FeedbackRequest
-		fields = ('pk', 'essay', 'edited', 'deadline')
+		fields = ('pk', 'essay', 'deadline')
+
+
+class ReturnFeedbackSerializer(serializers.ModelSerializer):
+	""" Serialize a Feedback. """
+	
+	class Meta:
+		model = Feedback
+		fields = ('comment', )
+
+	def update(self, instance, validated_data):
+		instance.comment = validated_data.get('comment', instance.comment)
+		instance.status = Feedback.RETURN_FEEDBACK
+		instance.save()
+		return instance
