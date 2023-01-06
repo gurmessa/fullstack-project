@@ -262,26 +262,28 @@ class FeedbackRequestRetrieveAPIViewTestCase(TestCase):
 		self.older_essay= essay_factory()
 		self.old_essay = essay_factory(revision_of=self.older_essay)
 		self.essay = essay_factory(revision_of=self.old_essay)
-		print(self.essay.pk)
-	def test_pickup_feedback_request(self):	
-		feedback_request = feedback_request_factory(self.older_essay)
-		feedback_request.assigned_editors.add(self.user)
-		feedback = feedback_factory(self.older_essay, feedback_request, self.user)
-		
-		feedback_request = feedback_request_factory(self.old_essay)
-		feedback_request.assigned_editors.add(self.user)
-		feedback = feedback_factory(self.old_essay, feedback_request, self.user)
-		
 
-		feedback_request = feedback_request_factory(self.essay)
-		feedback_request.assigned_editors.add(self.user)
-		feedback = feedback_factory(self.essay, feedback_request, self.user, False)
+	def test_pickup_feedback_request(self):	
+		older_feedback_request = feedback_request_factory(self.older_essay)
+		older_feedback_request.assigned_editors.add(self.user)
+		older_feedback = feedback_factory(self.older_essay, older_feedback_request, self.user)
 		
-		url = reverse('feedback-request-detail', kwargs={'pk':feedback_request.pk })
+		old_feedback_request = feedback_request_factory(self.old_essay)
+		old_feedback_request.assigned_editors.add(self.user)
+		old_feedback = feedback_factory(self.old_essay, old_feedback_request, self.user)
+		
+		essay_feedback_request = feedback_request_factory(self.essay)
+		essay_feedback_request.assigned_editors.add(self.user)
+		essay_feedback = feedback_factory(self.essay, essay_feedback_request, self.user, False)
+		
+		url = reverse('feedback-request-detail', kwargs={'pk':essay_feedback_request.pk })
 
 		
 		self.client.force_login(self.user)
 		response = self.client.get(url)
 		data = json.loads(response.content)
-		print(data)
 		
+		self.assertEqual(data['essay']['pk'], self.essay.pk)
+		self.assertEqual(data['essay']['revision_of']['pk'], self.old_essay.pk)
+		self.assertEqual(data['essay']['revision_of']['revision_of']['pk'], self.older_essay.pk)
+
